@@ -5,6 +5,9 @@ import httpx
 from dotenv import load_dotenv
 from pydantic import BaseModel
 from supabase import create_client
+import io
+import qrcode
+from fastapi.responses import Response
 
 load_dotenv()
 
@@ -138,7 +141,7 @@ def create_deal(req: DealRequest):
 async def deal_checkout(deal_id: str):
     deal = supabase.table("deals").select("*").eq("id", deal_id).single().execute().data
     order = await create_order(OrderRequest(amount=float(deal["amount"]), description=deal["job_title"]))
-    supabase.table("deals").update({"paypal_order_id": order["order_id"]}).eq("id", deal_id).execute()
+    supabase.table("deals").update({"paypal_order_id": order["order_id"],"approve_url": order["approve_url"],}).eq("id", deal_id).execute()
     return order
 
 @app.post("/deals/{deal_id}/upload")
@@ -150,3 +153,23 @@ async def upload_file(deal_id: str, file: UploadFile = File(...)):
     )
     supabase.table("deals").update({"file_path": path}).eq("id", deal_id).execute()
     return {"file_path": path}
+
+@app.get("/deals/{deal_id}/download")
+def download_file(deal_id: str):
+    deal = supabase.table("deals").select("*").eq("id", deal_id).single().execute().data
+    if deal["status"] != "paid":
+        raise HTTPException(status_code=403, detail="Payment required")
+    if not deal["file_path"]:
+        raise HTTPException(status_code=404, detail="No file uploaded")
+    signed = supabase.storage.from_("deliverables").create_signed_url(deal["file_path"], 60)
+    return {"download_url": signed["signedURL"]}
+
+@app.get("/deals/{deal_id}/qr")
+def deal_qr(deal_id: str):
+    deal = supabase.table("deals").select("approve_url").eq("id", deal_id).single().execute().data
+    if not deal["approve_url"]:
+        raise HTTPException(status_code=404, detail="Create checkout first")
+    img = qrcode.make(deal["approve_url"])
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return Response(content=buf.getvalue(), media_type="image/png")
