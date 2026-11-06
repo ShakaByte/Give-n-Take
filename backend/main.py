@@ -181,11 +181,14 @@ def download_file(deal_id: str):
     return {"download_url": signed["signedURL"]}
 
 @app.get("/deals/{deal_id}/qr")
-def deal_qr(deal_id: str):
-    deal = supabase.table("deals").select("approve_url").eq("id", deal_id).single().execute().data
-    if not deal["approve_url"]:
+def deal_qr(deal_id: str, kind: str):
+    if kind not in ("deposit", "final"):
+        raise HTTPException(status_code=400, detail="kind must be deposit or final")
+    deal = supabase.table("deals").select(f"{kind}_approve_url").eq("id", deal_id).single().execute().data
+    url = deal[f"{kind}_approve_url"]
+    if not url:
         raise HTTPException(status_code=404, detail="Create checkout first")
-    img = qrcode.make(deal["approve_url"])
+    img = qrcode.make(url)
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return Response(content=buf.getvalue(), media_type="image/png")
