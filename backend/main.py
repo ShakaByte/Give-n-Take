@@ -192,3 +192,21 @@ def deal_qr(deal_id: str, kind: str):
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     return Response(content=buf.getvalue(), media_type="image/png")
+
+@app.post("/deals/{deal_id}/preview")
+async def upload_preview(deal_id: str, file: UploadFile = File(...)):
+    content = await file.read()
+    path = f"{deal_id}/preview_{file.filename}"
+    supabase.storage.from_("deliverables").upload(
+        path, content, {"content-type": file.content_type, "upsert": "true"}
+    )
+    supabase.table("deals").update({"preview_path": path}).eq("id", deal_id).execute()
+    return {"preview_path": path}
+
+@app.get("/deals/{deal_id}/preview")
+def get_preview(deal_id: str):
+    deal = supabase.table("deals").select("preview_path").eq("id", deal_id).single().execute().data
+    if not deal["preview_path"]:
+        raise HTTPException(status_code=404, detail="No preview uploaded")
+    signed = supabase.storage.from_("deliverables").create_signed_url(deal["preview_path"], 3600)
+    return {"preview_url": signed["signedURL"]}
