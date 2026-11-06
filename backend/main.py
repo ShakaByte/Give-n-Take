@@ -115,7 +115,11 @@ async def paypal_webhook(request: Request):
 
     if event.get("event_type") == "PAYMENT.CAPTURE.COMPLETED":
         order_id = event["resource"]["supplementary_data"]["related_ids"]["order_id"]
-        supabase.table("deals").update({"status": "paid"}).eq("paypal_order_id", order_id).execute()
+        dep = supabase.table("deals").update({"status": "in_progress"}) \
+            .eq("deposit_order_id", order_id).eq("status", "pending_deposit").execute()
+        if not dep.data:
+            supabase.table("deals").update({"status": "paid"}) \
+                .eq("final_order_id", order_id).execute()
         print("PAID order:", order_id)
     return {"received": True}
 
@@ -131,17 +135,29 @@ class DealRequest(BaseModel):
 
 @app.post("/deals")
 def create_deal(req: DealRequest):
+    deposit = round(req.amount / 2, 2)
+    final = round(req.amount - deposit, 2)
     res = supabase.table("deals").insert({
         "job_title": req.job_title,
         "amount": req.amount,
+        "deposit_amount": deposit,
+        "final_amount": final,
     }).execute()
     return res.data[0]
 
 @app.post("/deals/{deal_id}/checkout")
-async def deal_checkout(deal_id: str):
+async def deal_checkout(deal_id: str, kind: str):
+    if kind not in ("deposit", "final"):
+        raise HTTPException(status_code=400, detail="kind must be deposit or final")
     deal = supabase.table("deals").select("*").eq("id", deal_id).single().execute().data
-    order = await create_order(OrderRequest(amount=float(deal["amount"]), description=deal["job_title"]))
-    supabase.table("deals").update({"paypal_order_id": order["order_id"],"approve_url": order["approve_url"],}).eq("id", deal_id).execute()
+    order = await create_order(OrderRequest(
+        amount=float(deal[f"{kind}_amount"]),
+        description=f"{deal['job_title']} - {kind}",
+    ))
+    supabase.table("deals").update({
+        f"{kind}_order_id": order["order_id"],
+        f"{kind}_approve_url": order["approve_url"],
+    }).eq("id", deal_id).execute()
     return order
 
 @app.post("/deals/{deal_id}/upload")
