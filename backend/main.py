@@ -119,7 +119,7 @@ async def paypal_webhook(request: Request):
         print("PAID order:", order_id)
     return {"received": True}
 
-@app.get("/db-test")
+@app.api_route("/db-test", methods=["GET", "HEAD"])
 def db_test():
     res = supabase.table("deals").select("*").limit(1).execute()
     return {"connected": True, "rows_found": len(res.data)}
