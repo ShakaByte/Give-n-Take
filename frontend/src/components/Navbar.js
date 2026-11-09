@@ -9,8 +9,11 @@ export default function Navbar() {
                 </Link>
                 <div className="nav-links">
                     <Link href="/">Home</Link>
+                    <Link href="/dashboard">Dashboard</Link>
                     <Link href="/deal-maker">Deal Maker</Link>
                     <Link href="/deals">Deals</Link>
+                    <Link href="/planner">Planner</Link>
+                    <Link href="/todos">To-dos</Link>
                     <Link href="/profile">Profile</Link>
                 </div>
             </div>

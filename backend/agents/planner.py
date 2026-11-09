@@ -1,5 +1,6 @@
 import json
 from datetime import date
+
 from agents.llm import ask
 
 SYSTEM = """You are a practical project coach for freelancers. Build a realistic, dated work plan for ONE job that finishes before its deadline, while respecting the freelancer's existing to-do list.

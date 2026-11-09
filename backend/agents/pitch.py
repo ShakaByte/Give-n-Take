@@ -1,4 +1,5 @@
 import json
+
 from agents.llm import ask
 
 SYSTEM = """You are a master freelance copywriter and sales closer. Write a persuasive, professional, friendly outreach pitch the freelancer can send to a client.

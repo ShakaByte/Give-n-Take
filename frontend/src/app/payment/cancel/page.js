@@ -5,7 +5,7 @@ export default function PaymentCancel() {
             <div className="card">
                 <p>
                     No money was taken. You can go back and use the payment link
-                    or QR code again whenever you're ready.
+                    or QR code again whenever you&apos;re ready.
                 </p>
             </div>
         </div>

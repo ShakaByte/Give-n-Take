@@ -108,3 +108,64 @@ h1, h2, h3 { font-weight: bold; }
 /* ===== CLIENT PAGE ===== */
 .preview-img { max-width: 100%; border: 1px solid var(--border); border-radius: var(--radius); }
 .client-wrap { max-width: 680px; margin: 0 auto; }
+
+/* ===== HOME ===== */
+.hero { text-align: center; padding: 48px 0 32px; }
+.hero-title { font-size: 44px; font-weight: bold; line-height: 1.15; }
+.hero-text { color: var(--muted); font-size: 18px; max-width: 620px; margin: 16px auto 0; }
+.hero-actions { display: flex; gap: 12px; justify-content: center; margin-top: 28px; }
+.btn-outline {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 8px 20px; font-size: 14px; cursor: pointer; text-decoration: none;
+}
+.btn-outline:hover { background: #f2f2f2; }
+a.btn { text-decoration: none; display: inline-block; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feature { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.feature-title { font-size: 17px; font-weight: bold; margin-bottom: 6px; }
+.feature-text { color: var(--muted); font-size: 14px; line-height: 1.5; }
+.home-section { margin-top: 48px; }
+.home-heading { font-size: 22px; font-weight: bold; margin-bottom: 16px; text-align: center; }
+.steps { list-style: none; padding: 0; max-width: 560px; margin: 0 auto; }
+.steps li { display: flex; gap: 14px; align-items: flex-start; padding: 8px 0; }
+.step-num {
+  flex-shrink: 0; width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px;
+}
+@media (max-width: 700px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .hero-title { font-size: 32px; }
+}
+
+/* ===== DASHBOARD ===== */
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+.stat { border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.stat-num { font-size: 28px; font-weight: bold; }
+.stat-label { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.dash-section { margin-top: 32px; }
+.empty { color: var(--muted); font-size: 14px; }
+@media (max-width: 700px) {
+  .grid-4 { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== TODOS ===== */
+.todo-row {
+  display: flex; align-items: center; gap: 12px;
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px;
+}
+.todo-row.is-done .todo-title { text-decoration: line-through; color: var(--muted); }
+.todo-main { flex: 1; }
+.todo-title { font-weight: bold; }
+.badge-high { background: var(--accent); color: var(--accent-text); }
+.badge-medium { border-style: solid; }
+.badge-low { border-style: dashed; color: var(--muted); }
+.grid-4-form { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 12px; align-items: end; }
+@media (max-width: 700px) {
+  .grid-4-form { grid-template-columns: 1fr 1fr; }
+}
+
+/* ===== PLANNER ===== */
+.plan-row { display: flex; gap: 16px; border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; }
+.plan-date { flex-shrink: 0; width: 110px; font-weight: bold; }
+.plan-task { flex: 1; }
+.plan-hours { flex-shrink: 0; color: var(--muted); font-size: 14px; }

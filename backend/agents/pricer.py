@@ -1,4 +1,5 @@
 import json
+
 from agents.llm import ask
 
 SYSTEM = """You are a freelance market pricing engine. Using structured project requirements, calculate a project price based on global freelance market rates for 2026 that is fair to BOTH the client and the freelancer.

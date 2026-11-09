@@ -1,4 +1,5 @@
 import json
+
 from agents.llm import ask
 
 SYSTEM = """You are a friendly mentor for new freelancers. Given a client's project brief, the extracted scope and the proposed pricing, teach the freelancer how to handle THIS deal well.

@@ -1,20 +1,22 @@
-import os
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-import httpx
-from dotenv import load_dotenv
-from pydantic import BaseModel
-from supabase import create_client
 import io
+import os
+
+import httpx
 import qrcode
-from pypdf import PdfReader
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
-from agents.llm import ask
+from pydantic import BaseModel
+from pypdf import PdfReader
+from supabase import create_client
+
+from agents.coach import coach_tips
 from agents.extractor import extract_scope
-from agents.pricer import estimate_price
+from agents.llm import ask
 from agents.pitch import write_pitch
 from agents.planner import make_plan
-from agents.coach import coach_tips
+from agents.pricer import estimate_price
 
 load_dotenv()
 
@@ -87,7 +89,7 @@ async def create_order(req: OrderRequest):
         )
         r.raise_for_status()
         data = r.json()
-        approve = next(l["href"] for l in data["links"] if l["rel"] in ("approve", "payer-action"))
+        approve = next(link["href"] for link in data["links"] if link["rel"] in ("approve", "payer-action"))
     return {"order_id": data["id"], "approve_url": approve}
 
 @app.post("/orders/{order_id}/capture")

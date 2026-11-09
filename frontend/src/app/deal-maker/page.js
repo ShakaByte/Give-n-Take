@@ -147,10 +147,10 @@ export default function DealMakerPage() {
                         className="input textarea"
                         value={brief}
                         onChange={(e) => setBrief(e.target.value)}
-                        placeholder="Paste the client's message here..."
+                        placeholder="Paste the client&apos;s message here..."
                     />
                     <p className="hint">
-                        Only text PDFs are supported. Scanned PDFs can't be
+                        Only text PDFs are supported. Scanned PDFs can&apos;t be
                         read.
                     </p>
                 </div>
@@ -278,7 +278,7 @@ export default function DealMakerPage() {
                         </p>
                         {!result.pricing.within_limits && (
                             <p className="notice" style={{ marginTop: 12 }}>
-                                The client's budget is below your minimum rate
+                                The client&apos;s budget is below your minimum rate
                                 for this service, so no price can satisfy both
                                 sides. Consider reducing the scope or declining.
                             </p>
