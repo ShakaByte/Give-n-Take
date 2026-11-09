@@ -34,6 +34,7 @@ pycparser==3.12
 pydantic==2.14.2
 pydantic_core==2.50.2
 PyJWT==2.15.1
+pypdf==7.0.0
 python-dotenv==1.2.4
 python-multipart==0.0.33
 qrcode==8.2

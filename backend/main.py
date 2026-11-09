@@ -7,12 +7,14 @@ from pydantic import BaseModel
 from supabase import create_client
 import io
 import qrcode
+from pypdf import PdfReader
 from fastapi.responses import Response
 from agents.llm import ask
 from agents.extractor import extract_scope
 from agents.pricer import estimate_price
 from agents.pitch import write_pitch
 from agents.planner import make_plan
+from agents.coach import coach_tips
 
 load_dotenv()
 
@@ -136,6 +138,10 @@ def db_test():
 class DealRequest(BaseModel):
     job_title: str
     amount: float
+    client_name: str | None = None
+    deadline: str | None = None  # YYYY-MM-DD
+    scope: dict | None = None
+    pitch: str | None = None
 
 
 @app.post("/deals")
@@ -147,6 +153,10 @@ def create_deal(req: DealRequest):
         "amount": req.amount,
         "deposit_amount": deposit,
         "final_amount": final,
+        "client_name": req.client_name,
+        "deadline": req.deadline,
+        "scope": req.scope,
+        "pitch": req.pitch,
     }).execute()
     return res.data[0]
 
@@ -260,24 +270,169 @@ class PlanRequest(BaseModel):
 
 @app.post("/agents/plan")
 def agent_plan(req: PlanRequest):
-    plan, provider = make_plan(req.scope, req.deadline, req.hours_per_day)
+    hours = req.hours_per_day
+    if hours is None:
+        prof = supabase.table("freelancer_profile").select("hours_per_day").limit(1).execute().data
+        hours = float(prof[0]["hours_per_day"]) if prof else None
+    rows = supabase.table("todos").select("title,priority,due_date,est_hours") \
+        .eq("done", False).execute().data
+    plan, provider = make_plan(req.scope, req.deadline, hours, rows)
     return {"provider": provider, "plan": plan}
 
 class DealMakerRequest(BaseModel):
     brief: str
     client_budget: float | None = None
+    service: str | None = None
     freelancer_min: float | None = None
     freelancer_name: str | None = None
+    learning_mode: bool | None = None  # None = on if profile is beginner
 
 
 @app.post("/agents/deal-maker")
 def deal_maker(req: DealMakerRequest):
+    rows = supabase.table("freelancer_profile").select("*").limit(1).execute().data
+    prof = rows[0] if rows else None
+
+    name = req.freelancer_name or (prof["name"] if prof else None)
+    fmin = req.freelancer_min
+    if fmin is None and prof and req.service:
+        for s in prof["services"]:
+            if s["service"].strip().lower() == req.service.strip().lower():
+                fmin = float(s["min_rate"])
+                break
+
     scope, p1 = extract_scope(req.brief)
-    pricing, p2 = estimate_price(scope, req.client_budget, req.freelancer_min)
-    pitch, p3 = write_pitch(scope, pricing, req.freelancer_name)
+    pricing, p2 = estimate_price(scope, req.client_budget, fmin)
+    pitch, p3 = write_pitch(scope, pricing, name)
+
+    level = prof["experience_level"] if prof else None
+    learn = req.learning_mode if req.learning_mode is not None else (level == "beginner")
+    coaching, providers = None, [p1, p2, p3]
+    if learn:
+        coaching, p4 = coach_tips(req.brief, scope, pricing, level)
+        providers.append(p4)
+
     return {
         "scope": scope,
         "pricing": pricing,
         "pitch": pitch,
-        "providers": [p1, p2, p3],
+        "coaching": coaching,
+        "providers": providers,
+        "used_profile": {"freelancer_name": name, "freelancer_min": fmin},
     }
+
+class ServiceItem(BaseModel):
+    service: str
+    min_rate: float
+
+
+class ProfileRequest(BaseModel):
+    name: str
+    profession: str | None = None
+    services: list[ServiceItem] = []
+    skills: list[str] = []
+    experience_level: str = "beginner"
+    hours_per_day: float = 4
+
+
+@app.get("/profile")
+def get_profile():
+    res = supabase.table("freelancer_profile").select("*").limit(1).execute()
+    return res.data[0] if res.data else None
+
+
+@app.put("/profile")
+def save_profile(req: ProfileRequest):
+    data = req.model_dump()
+    existing = supabase.table("freelancer_profile").select("id").limit(1).execute().data
+    if existing:
+        res = supabase.table("freelancer_profile").update(data).eq("id", existing[0]["id"]).execute()
+    else:
+        res = supabase.table("freelancer_profile").insert(data).execute()
+    return res.data[0]
+
+class TodoCreate(BaseModel):
+    title: str
+    priority: str = "medium"  # low, medium, high
+    due_date: str | None = None  # YYYY-MM-DD
+    est_hours: float | None = None
+
+
+class TodoUpdate(BaseModel):
+    title: str | None = None
+    priority: str | None = None
+    due_date: str | None = None
+    est_hours: float | None = None
+    done: bool | None = None
+
+
+@app.post("/todos")
+def add_todo(req: TodoCreate):
+    if req.priority not in ("low", "medium", "high"):
+        raise HTTPException(status_code=400, detail="priority must be low, medium or high")
+    res = supabase.table("todos").insert(req.model_dump()).execute()
+    return res.data[0]
+
+
+@app.get("/todos")
+def list_todos():
+    res = supabase.table("todos").select("*").order("created_at").execute()
+    return res.data
+
+
+@app.patch("/todos/{todo_id}")
+def update_todo(todo_id: str, req: TodoUpdate):
+    data = req.model_dump(exclude_unset=True)
+    if "priority" in data and data["priority"] not in ("low", "medium", "high"):
+        raise HTTPException(status_code=400, detail="priority must be low, medium or high")
+    if not data:
+        raise HTTPException(status_code=400, detail="Nothing to update")
+    res = supabase.table("todos").update(data).eq("id", todo_id).execute()
+    return res.data[0]
+
+
+@app.delete("/todos/{todo_id}")
+def delete_todo(todo_id: str):
+    supabase.table("todos").delete().eq("id", todo_id).execute()
+    return {"deleted": True}
+
+@app.get("/deals")
+def list_deals():
+    res = supabase.table("deals").select("*").order("created_at", desc=True).execute()
+    return res.data
+
+
+@app.get("/deals/{deal_id}")
+def get_deal(deal_id: str):
+    res = supabase.table("deals").select("*").eq("id", deal_id).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    return res.data[0]
+
+@app.post("/deals/{deal_id}/submit")
+def submit_work(deal_id: str):
+    res = supabase.table("deals").select("*").eq("id", deal_id).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Deal not found")
+    deal = res.data[0]
+    if deal["status"] != "in_progress":
+        raise HTTPException(status_code=400, detail="Deposit must be paid first")
+    if not deal["file_path"] or not deal["preview_path"]:
+        raise HTTPException(status_code=400, detail="Upload both the final file and the preview first")
+    updated = supabase.table("deals").update({"status": "awaiting_final"}).eq("id", deal_id).execute()
+    return updated.data[0]
+
+@app.post("/pdf-to-text")
+async def pdf_to_text(file: UploadFile = File(...)):
+    if not file.filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only PDF files are accepted")
+    data = await file.read()
+    try:
+        reader = PdfReader(io.BytesIO(data))
+        text = "\n".join((p.extract_text() or "") for p in reader.pages).strip()
+    except Exception:
+        raise HTTPException(status_code=400, detail="Could not read this PDF")
+    if not text:
+        raise HTTPException(status_code=400, detail="No readable text found (scanned PDFs are not supported)")
+    return {"text": text[:15000], "pages": len(reader.pages), "truncated": len(text) > 15000}
+
