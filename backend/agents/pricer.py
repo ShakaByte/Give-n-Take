@@ -37,7 +37,13 @@ def estimate_price(scope: dict, client_budget=None, freelancer_min=None):
             price = max(price, freelancer_min)
         if client_budget is not None:
             price = min(price, client_budget)
-
+    
+    rng = result.get("price_range") or {}
+    if client_budget is not None and not conflict and rng:
+        rng["high"] = min(float(rng.get("high", price)), client_budget)
+        rng["low"] = min(float(rng.get("low", price)), rng["high"])
+        result["price_range"] = rng
+    
     price = round(price, 2)
     deposit = round(price / 2, 2)
     result["recommended_price"] = price

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { api } from "../../lib/api";
+import Link from "next/link";
 
 const STEPS = [
     "Reading the client's brief and extracting the scope",
@@ -21,6 +22,12 @@ export default function DealMakerPage() {
     const [result, setResult] = useState(null);
     const [copied, setCopied] = useState(false);
     const [error, setError] = useState("");
+    const [jobTitle, setJobTitle] = useState("");
+    const [clientName, setClientName] = useState("");
+    const [deadline, setDeadline] = useState("");
+    const [amount, setAmount] = useState("");
+    const [saving, setSaving] = useState(false);
+    const [savedDeal, setSavedDeal] = useState(null);
 
     useEffect(() => {
         api("/profile")
@@ -81,11 +88,38 @@ export default function DealMakerPage() {
                 method: "POST",
                 body: JSON.stringify(body),
             });
-            setResult(res);
+                setResult(res);
+                setSavedDeal(null);
+                setAmount(res.pricing.recommended_price);
+                setJobTitle(service ? `${service} project` : "New project");
         } catch (err) {
             setError(err.message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const saveDeal = async () => {
+        setError("");
+        setSaving(true);
+        try {
+            const body = {
+                job_title: jobTitle,
+                amount: Number(amount),
+                client_name: clientName || null,
+                deadline: deadline || null,
+                scope: result.scope,
+                pitch: result.pitch,
+            };
+            const deal = await api("/deals", {
+                method: "POST",
+                body: JSON.stringify(body),
+            });
+            setSavedDeal(deal);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setSaving(false);
         }
     };
 
@@ -155,7 +189,8 @@ export default function DealMakerPage() {
                     </div>
                     <div>
                         <label className="label">
-                            Client budget (USD, optional)
+                            Client budget (USD, optional: read from the brief if
+                            empty)
                         </label>
                         <input
                             type="number"
@@ -285,6 +320,99 @@ export default function DealMakerPage() {
                                 {copied ? "Copied" : "Copy pitch"}
                             </button>
                         </div>
+                    </div>
+                    <div className="card stack">
+                        <h2 className="section-title">Accept this deal</h2>
+                        {savedDeal ? (
+                            <div className="notice">
+                                <p>
+                                    <b>Deal saved.</b> Total ${savedDeal.amount}
+                                    : deposit ${savedDeal.deposit_amount}, final
+                                    ${savedDeal.final_amount}.
+                                </p>
+                                <Link
+                                    href={`/deals/${savedDeal.id}`}
+                                    className="btn-link"
+                                >
+                                    Open deal page
+                                </Link>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid-2">
+                                    <div>
+                                        <label className="label">
+                                            Job title
+                                        </label>
+                                        <input
+                                            className="input"
+                                            value={jobTitle}
+                                            onChange={(e) =>
+                                                setJobTitle(e.target.value)
+                                            }
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="label">
+                                            Client name
+                                        </label>
+                                        <input
+                                            className="input"
+                                            value={clientName}
+                                            onChange={(e) =>
+                                                setClientName(e.target.value)
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                                <div className="grid-2">
+                                    <div>
+                                        <label className="label">
+                                            Agreed total price (USD)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            className="input"
+                                            value={amount}
+                                            onChange={(e) =>
+                                                setAmount(e.target.value)
+                                            }
+                                        />
+                                        <p className="hint">
+                                            Once saved, the price is locked and
+                                            split 50/50.
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <label className="label">
+                                            Deadline (optional)
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className="input"
+                                            value={deadline}
+                                            onChange={(e) =>
+                                                setDeadline(e.target.value)
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                                <button
+                                    className="btn"
+                                    onClick={saveDeal}
+                                    disabled={
+                                        saving ||
+                                        !jobTitle.trim() ||
+                                        !(Number(amount) > 0)
+                                    }
+                                >
+                                    {saving
+                                        ? "Saving..."
+                                        : "Accept and save deal"}
+                                </button>
+                            </>
+                        )}
                     </div>
 
                     {result.coaching && (

@@ -88,3 +88,19 @@ h1, h2, h3 { font-weight: bold; }
 .list { padding-left: 20px; }
 .list li { margin-bottom: 4px; }
 .notice { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; }
+
+/* ===== DEAL PAGE ===== */
+.badge { display: inline-block; border: 1px solid var(--border); border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: bold; }
+.qr-img { width: 220px; height: 220px; border: 1px solid var(--border); }
+.link-box { word-break: break-all; font-size: 13px; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; }
+.meta { color: var(--muted); font-size: 14px; }
+
+/* ===== DEALS LIST ===== */
+.deal-row {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 16px; text-decoration: none; color: var(--text);
+}
+.deal-row:hover { background: #f2f2f2; }
+.deal-row-title { font-weight: bold; }
+.deal-row-right { text-align: right; }

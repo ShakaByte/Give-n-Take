@@ -24,6 +24,8 @@ PAYPAL_BASE_URL = os.getenv("PAYPAL_BASE_URL", "https://api-m.sandbox.paypal.com
 
 PAYPAL_WEBHOOK_ID = os.getenv("PAYPAL_WEBHOOK_ID")
 
+RETURN_BASE = os.getenv("PAYMENT_RETURN_BASE", "http://localhost:3000")
+
 supabase = create_client(os.getenv("SUPABASE_URL"), os.getenv("SUPABASE_SECRET_KEY"))
 
 app = FastAPI()
@@ -75,8 +77,8 @@ async def create_order(req: OrderRequest):
                 "payment_source": {
                     "paypal": {
                         "experience_context": {
-                            "return_url": "http://localhost:3000/payment/success",
-                            "cancel_url": "http://localhost:3000/payment/cancel",
+                            "return_url": f"{RETURN_BASE}/payment/success",
+                            "cancel_url": f"{RETURN_BASE}/payment/cancel",
                             "user_action": "PAY_NOW",
                         }
                     }
@@ -302,7 +304,13 @@ def deal_maker(req: DealMakerRequest):
                 break
 
     scope, p1 = extract_scope(req.brief)
-    pricing, p2 = estimate_price(scope, req.client_budget, fmin)
+    budget = req.client_budget
+    if budget is None:
+        try:
+            budget = float(scope.get("client_budget_usd"))
+        except (TypeError, ValueError):
+            budget = None
+    pricing, p2 = estimate_price(scope, budget, fmin)
     pitch, p3 = write_pitch(scope, pricing, name)
 
     level = prof["experience_level"] if prof else None
@@ -436,3 +444,22 @@ async def pdf_to_text(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="No readable text found (scanned PDFs are not supported)")
     return {"text": text[:15000], "pages": len(reader.pages), "truncated": len(text) > 15000}
 
+@app.post("/payments/complete/{order_id}")
+async def complete_payment(order_id: str):
+    token = await get_paypal_token()
+    async with httpx.AsyncClient() as client:
+        r = await client.post(
+            f"{PAYPAL_BASE_URL}/v2/checkout/orders/{order_id}/capture",
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+        )
+    data = r.json()
+    already = any(d.get("issue") == "ORDER_ALREADY_CAPTURED" for d in data.get("details", []))
+    if data.get("status") != "COMPLETED" and not already:
+        raise HTTPException(status_code=400, detail=data.get("message") or "Payment was not completed")
+
+    rows = supabase.table("deals").select("id,deposit_order_id") \
+        .or_(f"deposit_order_id.eq.{order_id},final_order_id.eq.{order_id}").execute().data
+    if not rows:
+        raise HTTPException(status_code=404, detail="No deal found for this payment")
+    deal = rows[0]
+    return {"deal_id": deal["id"], "kind": "deposit" if deal["deposit_order_id"] == order_id else "final"}
