@@ -225,6 +225,18 @@ export default function DealPage() {
                     </div>
                 </div>
             )}
+            <div className="card stack">
+                <h2 className="section-title">Client link</h2>
+                <div className="link-box">
+                    {typeof window !== "undefined"
+                        ? `${window.location.origin}/pay/${id}`
+                        : ""}
+                </div>
+                <p className="hint">
+                    Send this link to your client. They pay and download from
+                    there.
+                </p>
+            </div>
         </div>
     );
 }

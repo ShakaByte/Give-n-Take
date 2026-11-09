@@ -41,10 +41,10 @@ function Inner() {
                             on the deal page.
                         </p>
                         <Link
-                            href={`/deals/${state.deal_id}`}
+                            href={`/pay/${state.deal_id}`}
                             className="btn-link"
                         >
-                            Go to the deal page
+                            Back to your project
                         </Link>
                     </>
                 )}
