@@ -14,6 +14,6 @@ for key, value in {
 }.items():
     os.environ.setdefault(key, value)
 
-import supabase # noqa: E402
+import supabase  # noqa: E402
 
 supabase.create_client = lambda *a, **k: MagicMock()
