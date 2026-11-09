@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
+/* ===== THEME: change colors here later ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg: #ffffff;
+  --text: #000000;
+  --muted: #555555;
+  --border: #000000;
+  --accent: #000000;
+  --accent-text: #ffffff;
+  --danger: #000000;
+  --success: #000000;
+  --radius: 6px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ===== BASE ===== */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text);
   font-family: Arial, Helvetica, sans-serif;
+  font-size: 15px;
 }
+h1, h2, h3 { font-weight: bold; }
+
+/* ===== LAYOUT ===== */
+.container { max-width: 960px; margin: 0 auto; padding: 32px 24px; }
+.narrow { max-width: 680px; }
+.stack > * + * { margin-top: 16px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+/* ===== NAVBAR ===== */
+.navbar { border-bottom: 1px solid var(--border); }
+.navbar-inner {
+  max-width: 960px; margin: 0 auto; padding: 16px 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.brand { font-size: 20px; font-weight: bold; text-decoration: none; color: var(--text); }
+.nav-links { display: flex; gap: 24px; }
+.nav-links a { color: var(--text); text-decoration: none; font-size: 14px; }
+.nav-links a:hover { text-decoration: underline; }
+
+/* ===== TEXT ===== */
+.page-title { font-size: 26px; }
+.page-subtitle { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+/* ===== CARD ===== */
+.card { border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-top: 24px; }
+
+/* ===== FORMS ===== */
+.label { display: block; font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+.input {
+  width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
+  padding: 8px 12px; font-size: 14px; background: var(--bg); color: var(--text);
+}
+.input-small { width: 120px; flex-shrink: 0; }
+
+/* ===== BUTTONS ===== */
+.btn {
+  background: var(--accent); color: var(--accent-text); border: 1px solid var(--accent);
+  border-radius: var(--radius); padding: 8px 20px; font-size: 14px; cursor: pointer;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-link { background: none; border: none; text-decoration: underline; cursor: pointer; font-size: 14px; color: var(--text); }
+.btn-icon { background: none; border: none; cursor: pointer; font-size: 16px; padding: 0 8px; color: var(--muted); }
+
+/* ===== MESSAGES ===== */
+.msg-success { color: var(--success); font-size: 14px; }
+.msg-error { color: var(--danger); font-size: 14px; font-weight: bold; }
+
+/* ===== DEAL MAKER ===== */
+.textarea { min-height: 200px; resize: vertical; font-family: inherit; }
+.hint { color: var(--muted); font-size: 13px; margin-top: 4px; }
+.checkbox-row { display: flex; gap: 8px; align-items: center; font-size: 14px; }
+
+/* ===== PROGRESS ===== */
+.progress-list { list-style: none; padding: 0; }
+.progress-list li { padding: 4px 0; color: var(--muted); }
+.progress-list li.active { color: var(--text); font-weight: bold; }
+.progress-list li.done { color: var(--text); }
+
+/* ===== RESULTS ===== */
+.section-title { font-size: 18px; margin-bottom: 8px; }
+.price-big { font-size: 36px; font-weight: bold; }
+.split-row { display: flex; gap: 32px; margin-top: 8px; }
+.pitch-box { white-space: pre-wrap; border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; font-size: 14px; line-height: 1.5; }
+.list { padding-left: 20px; }
+.list li { margin-bottom: 4px; }
+.notice { border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; font-size: 14px; }
