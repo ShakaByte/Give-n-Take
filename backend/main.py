@@ -8,6 +8,11 @@ from supabase import create_client
 import io
 import qrcode
 from fastapi.responses import Response
+from agents.llm import ask
+from agents.extractor import extract_scope
+from agents.pricer import estimate_price
+from agents.pitch import write_pitch
+from agents.planner import make_plan
 
 load_dotenv()
 
@@ -210,3 +215,69 @@ def get_preview(deal_id: str):
         raise HTTPException(status_code=404, detail="No preview uploaded")
     signed = supabase.storage.from_("deliverables").create_signed_url(deal["preview_path"], 3600)
     return {"preview_url": signed["signedURL"]}
+
+@app.get("/ai-test")
+def ai_test():
+    text, provider = ask("You are a helpful assistant.", "Say hello in one short sentence.")
+    return {"provider": provider, "reply": text}
+
+class BriefRequest(BaseModel):
+    brief: str
+
+
+@app.post("/agents/extract")
+def agent_extract(req: BriefRequest):
+    result, provider = extract_scope(req.brief)
+    return {"provider": provider, "scope": result}
+
+class PriceRequest(BaseModel):
+    scope: dict
+    client_budget: float | None = None
+    freelancer_min: float | None = None
+
+
+@app.post("/agents/price")
+def agent_price(req: PriceRequest):
+    result, provider = estimate_price(req.scope, req.client_budget, req.freelancer_min)
+    return {"provider": provider, "pricing": result}
+
+class PitchRequest(BaseModel):
+    scope: dict
+    pricing: dict
+    freelancer_name: str | None = None
+
+
+@app.post("/agents/pitch")
+def agent_pitch(req: PitchRequest):
+    pitch, provider = write_pitch(req.scope, req.pricing, req.freelancer_name)
+    return {"provider": provider, "pitch": pitch}
+
+class PlanRequest(BaseModel):
+    scope: dict
+    deadline: str  # YYYY-MM-DD
+    hours_per_day: float | None = None
+
+
+@app.post("/agents/plan")
+def agent_plan(req: PlanRequest):
+    plan, provider = make_plan(req.scope, req.deadline, req.hours_per_day)
+    return {"provider": provider, "plan": plan}
+
+class DealMakerRequest(BaseModel):
+    brief: str
+    client_budget: float | None = None
+    freelancer_min: float | None = None
+    freelancer_name: str | None = None
+
+
+@app.post("/agents/deal-maker")
+def deal_maker(req: DealMakerRequest):
+    scope, p1 = extract_scope(req.brief)
+    pricing, p2 = estimate_price(scope, req.client_budget, req.freelancer_min)
+    pitch, p3 = write_pitch(scope, pricing, req.freelancer_name)
+    return {
+        "scope": scope,
+        "pricing": pricing,
+        "pitch": pitch,
+        "providers": [p1, p2, p3],
+    }
