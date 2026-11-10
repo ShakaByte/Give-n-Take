@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Greenleaf Bakery</title>
+<style>
+body{margin:0;font-family:Georgia,serif;color:#2b2b2b;background:#fffdf7}
+header{background:#2f5d3a;color:#fff;padding:20px 8%;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:26px}nav a{color:#fff;margin-left:20px;text-decoration:none}
+.hero{padding:90px 8%;background:#e9f2e4}.hero h2{font-size:44px;margin:0 0 12px}
+.hero p{font-size:18px;max-width:560px}.btn{display:inline-block;background:#2f5d3a;color:#fff;padding:12px 26px;border-radius:6px;text-decoration:none;border:0;font-size:15px}
+section{padding:50px 8%}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:20px}
+form{display:grid;gap:12px;max-width:480px}input,textarea,select{padding:10px;border:1px solid #bbb;border-radius:6px;font-size:15px}
+footer{background:#2f5d3a;color:#fff;padding:24px 8%;text-align:center}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.hero h2{font-size:32px}}
+</style></head><body>
+<header><h1>Greenleaf Bakery</h1><nav><a href="#menu">Menu</a><a href="#order">Order a cake</a><a href="#visit">Visit us</a></nav></header>
+<div class="hero"><h2>Fresh bread. Custom cakes. Made with love.</h2><p>Family-run and baking since 2009. Pick up warm bread every morning, or order a custom cake for your next celebration.</p><a class="btn" href="#order">Order a custom cake</a></div>
+<section id="menu"><h2>Menu highlights</h2><div class="grid">
+<div class="card"><h3>Sourdough loaf</h3><p>Slow-fermented, crusty outside, soft inside.</p></div>
+<div class="card"><h3>Butter croissant</h3><p>Flaky layers baked fresh every morning.</p></div>
+<div class="card"><h3>Seasonal fruit tart</h3><p>Crisp pastry with vanilla cream and fresh fruit.</p></div></div></section>
+<section id="order"><h2>Order a custom cake</h2><form>
+<input placeholder="Your name"><input placeholder="Phone or email"><input type="date">
+<select><option>Chocolate</option><option>Vanilla</option><option>Lemon</option></select>
+<textarea rows="4" placeholder="Tell us about your cake"></textarea><button class="btn" type="button">Send request</button></form></section>
+<section id="visit"><h2>Visit us</h2><p>12 Orchard Lane. Open Tuesday to Sunday, 7am to 5pm.</p></section>
+<footer>Greenleaf Bakery. Sample site built for demonstration.</footer>
+</body></html>

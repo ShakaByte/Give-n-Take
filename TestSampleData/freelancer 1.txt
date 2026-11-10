@@ -1,0 +1,45 @@
+FREELANCER 1 OF 3: MAYA PATEL
+Graphic designer (beginner)
+============================================================
+
+NOTE: You do NOT have to use this test data. You can enter your
+own profile, brief and files instead. This is only here to make
+testing quick. All names and companies are invented.
+
+STEP 1: PROFILE PAGE (enter these values, then click Save profile)
+  Name:               Maya Patel
+  Profession:         Graphic designer
+  Experience level:   Beginner
+  Work hours per day: 5
+  Skills:             Branding, Adobe Illustrator, Figma, Typography
+  Services and minimum rate (USD):
+    Logo design: 150
+    Social media post pack: 60
+    Business card design: 40
+
+STEP 2: TO-DOS PAGE (optional, the Planner reads these)
+  Send invoice template to new clients | Medium | 1 hour | due in 2 days
+  Call Jordan about logo colours | High | 1 hour | due in 3 days
+  Update Behance portfolio | Low | 2 hours | no date
+  Renew Adobe subscription | Medium | 0.5 hours | due in 5 days
+
+STEP 3: DEAL MAKER
+  Files in this folder:
+    client_brief_brewline.pdf: attach it in the Deal Maker
+    final_brewline_logo.png: upload as the FINAL file
+    preview_brewline_logo.png: upload as the PREVIEW
+  Pick the service: Logo design
+  Leave the budget box empty (it is read from the brief).
+  Click Generate deal, then Accept and save deal.
+  Expected: a price of about $200 to $300 (never above the client's $300 budget, never below $150). Learning mode tips appear because Maya is a beginner.
+
+STEP 4: THE REST OF THE FLOW
+  Planner: pick the deal, choose a deadline a week or two away.
+  Deal page: Create deposit link, then open the Client link in a
+    private window (this is the client).
+  Client pays the deposit with the PayPal sandbox buyer account.
+  Freelancer uploads the final file and the preview, then submits.
+  Client reviews the preview and pays the remaining amount.
+  Client page shows Paid in full, then Download final file.
+
+Payments can take up to 2 minutes to show up (PayPal webhook).

@@ -1,0 +1,44 @@
+FREELANCER 3 OF 3: SOFIA LINDQVIST
+Content writer and copywriter (expert)
+============================================================
+
+NOTE: You do NOT have to use this test data. You can enter your
+own profile, brief and files instead. This is only here to make
+testing quick. All names and companies are invented.
+
+STEP 1: PROFILE PAGE (enter these values, then click Save profile)
+  Name:               Sofia Lindqvist
+  Profession:         Content writer and copywriter
+  Experience level:   Expert
+  Work hours per day: 4
+  Skills:             SEO writing, Copywriting, B2B SaaS, Editing
+  Services and minimum rate (USD):
+    Blog article (1500 words): 120
+    Website copy (per page): 90
+    Email newsletter: 70
+
+STEP 2: TO-DOS PAGE (optional, the Planner reads these)
+  Edit chapter for Nimbus case study | Medium | 2 hours | due in 3 days
+  Send keyword research to client | High | 1 hour | due in 1 day
+  Pitch two new SaaS clients | Low | 2 hours | no date
+
+STEP 3: DEAL MAKER
+  Files in this folder:
+    client_brief_nimbus.pdf: attach it in the Deal Maker
+    final_nimbus_article.pdf: upload as the FINAL file
+    preview_nimbus_article.pdf: upload as the PREVIEW (the client opens it as a link)
+  Pick the service: Blog article (1500 words)
+  Leave the budget box empty (it is read from the brief).
+  Click Generate deal, then Accept and save deal.
+  Expected: a price between $120 and $200 (the client's budget). Learning mode is off by default because Sofia is an expert.
+
+STEP 4: THE REST OF THE FLOW
+  Planner: pick the deal, choose a deadline a week or two away.
+  Deal page: Create deposit link, then open the Client link in a
+    private window (this is the client).
+  Client pays the deposit with the PayPal sandbox buyer account.
+  Freelancer uploads the final file and the preview, then submits.
+  Client reviews the preview and pays the remaining amount.
+  Client page shows Paid in full, then Download final file.
+
+Payments can take up to 2 minutes to show up (PayPal webhook).
