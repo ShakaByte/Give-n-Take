@@ -6,7 +6,7 @@
 An AI agent for freelancers. It builds a fair deal for both sides, helps plan the work, and locks the final file until the client pays through PayPal. Built for the PayPal AI Hackathon.
 
 **Live demo:** <https://give-n-take-one.vercel.app/>
-**Demo video:** <your YouTube URL>
+**Demo video:** <https://youtu.be/FRaGJGh4bQw?si=77vPsnsUz6Yjqg6G>
 
 ## The problem
 
